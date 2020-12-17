@@ -52,7 +52,7 @@ termsH = 1:size(coeffnames(phaseFitH));
 %check each coefficient name to determine the exponent of x and y
 for i = 1:size(coeffnames(phaseFitH))
     curCoeffName = char(coeffnames(phaseFitH));
-    termsH(i) = x*curCoeffName(2)*y*curCoeffName(3);
+    termsH(i) = (x^curCoeffName(2))*(y^curCoeffName(3));
 end
 
 %V and H should have the same number of terms
