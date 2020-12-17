@@ -31,31 +31,29 @@ for i = 1:phase_size(1)
 end
 
 %make a poly22 fit for the phases from camera 2
-[phase_X, phase_Y] = ndgrid(1:phase_size(1), 1:phase_size(2));
-phaseFitH = fit([phase_X(:) phase_Y(:)], cam2H(:), 'poly22', 'Exclude',...
+[phase_Y, phase_X] = ndgrid(1:phase_size(1), 1:phase_size(2));
+phaseFitH = fit([phase_X(:) phase_Y(:)], cam2H(:), 'poly33', 'Exclude',...
     cam2H(:) == 0);
-phaseFitV = fit([phase_X(:) phase_Y(:)], cam2V(:), 'poly22', 'Exclude',...
+phaseFitV = fit([phase_X(:) phase_Y(:)], cam2V(:), 'poly33', 'Exclude',...
     cam2V(:) == 0);
 % plot(phaseFitH);
 % plot(phaseFitV);
-
-%replace x and y with arrays later
-syms terms(x,y) 
 
 %obtain the coefficient values
 coeffValsH = coeffvalues(phaseFitH);
 coeffValsV = coeffvalues(phaseFitV);
 
-%create an array to hold the x and y terms
-termsH = 1:size(coeffnames(phaseFitH));
+%Create coefficient matrix
+coeffM = [coeffValsH; coeffValsV];
 
-%check each coefficient name to determine the exponent of x and y
-for i = 1:size(coeffnames(phaseFitH))
-    curCoeffName = char(coeffnames(phaseFitH));
-    termsH(i) = x*curCoeffName(2)*y*curCoeffName(3);
-end
+coeffMinv = pinv(coeffM);
 
-%V and H should have the same number of terms
-termsV = termsV;
+PhaseM = [cam1H(:) cam1V(:)];
+
+Coords = coeffMinv*PhaseM';
+
+X = Coords(2,:);
+Y = Coords(3,:);
+scatter(X,Y);
 
 end
