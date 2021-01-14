@@ -1,5 +1,5 @@
 clc; clear all; close all;
-[I1, I2] = ProjectFringesAndCenterline(40,100);
+[I1, I2] = ProjectFringesAndCenterline(10,40);
 [M,N] = size(I1(:,:,1));
 I_row1 = zeros(M,N,8);
 I_column1 = zeros(M,N,8);
@@ -160,18 +160,17 @@ cam2V = imgaussfilt(unwrapped_col2_adj,5);
 
 stereoCalFilename = uigetfile('*.mat');
 load(stereoCalFilename);
-% cam1H = undistortImage(cam1H,stereoParams.CameraParameters1);
-% cam1V = undistortImage(cam1V,stereoParams.CameraParameters1);
-% cam2H = undistortImage(cam2H,stereoParams.CameraP[arameters2);
-% cam2V = undistortImage(cam2V,stereoParams.CameraParameters2);
+cam1H = undistortImage(cam1H,stereoParams.CameraParameters1);
+cam1V = undistortImage(cam1V,stereoParams.CameraParameters1);
+cam2H = undistortImage(cam2H,stereoParams.CameraParameters2);
+cam2V = undistortImage(cam2V,stereoParams.CameraParameters2);
 
 [matchedPoints1, matchedPoints2] = coordinateSolve(cam1H, cam1V, cam2H, cam2V);
 
-matchedPoints1 = undistortPoints(matchedPoints1',stereoParams.CameraParameters2);
-matchedPoints2 = undistortPoints(matchedPoints2',stereoParams.CameraParameters1);
-[worldPoints, reprojError] = triangulate(matchedPoints2,matchedPoints1,stereoParams);
+% matchedPoints1 = undistortPoints(matchedPoints1',stereoParams.CameraParameters2);
+% matchedPoints2 = undistortPoints(matchedPoints2',stereoParams.CameraParameters1);
+[worldPoints, reprojError] = triangulate(matchedPoints2',matchedPoints1',stereoParams);
 worldPoints = rmoutliers(worldPoints);
-
 X = worldPoints(:,1); Y = worldPoints(:,2); Z = worldPoints(:,3);
 
 figure

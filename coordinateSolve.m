@@ -37,8 +37,9 @@ warning('off','all')
 % Coords = coeffMinv*PhaseM';
 % X = Coords(2,:);
 % Y = Coords(3,:);
-cam2H = imresize(cam2H,5);
-cam2V = imresize(cam2V,5);
+scale = 2;
+cam2H = imresize(cam2H,scale);
+cam2V = imresize(cam2V,scale);
 
 [M,N] = size(cam1H);
 cam2H = round(cam2H,3);
@@ -69,8 +70,8 @@ figure
 subplot(1,2,1)
 imagesc(cam1H); hold on;
 subplot(1,2,2)
-imagesc(imresize(cam2H,1/5)); hold on;
-f = figure;
+imagesc(imresize(cam2H,1/scale)); hold on;
+
 for i = y(3):100:y(4)
    
     for j = x(1):100:x(2)
@@ -81,17 +82,17 @@ for i = y(3):100:y(4)
       
         p1 = polyfit(indHy,indHx,3);
         p2 = polyfit(indVy,indVx,3);
-        close(f)
-        f = figure;
-        imagesc(imresize(cam2H,1/5)); hold on;
-        scatter(indHy/5,indHx/5)
-        scatter(indVy/5,indVx/5)
+%         close(f)
+%         f = figure;
+%         imagesc(imresize(cam2H,1/scale)); hold on;
+%         scatter(indHy/scale,indHx/scale)
+%         scatter(indVy/scale,indVx/scale)
         %calculate intersection
-        x_intersecttemp = fzero(@(x) polyval(p1-p2,x),3);
+        x_intersecttemp = fzero(@(x) polyval(p1-p2,x),0);
         y_intersecttemp = polyval(p1,x_intersecttemp);
-        x_intersect = [x_intersect x_intersecttemp/5];
-        y_intersect = [y_intersect y_intersecttemp/5];
-       scatter(y_intersecttemp/5,x_intersecttemp/5)
+        x_intersect = [x_intersect x_intersecttemp/scale];
+        y_intersect = [y_intersect y_intersecttemp/scale];
+%        scatter(y_intersecttemp/5,x_intersecttemp/5)
        
     end
 end
