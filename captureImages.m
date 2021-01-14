@@ -11,6 +11,8 @@ function [out1, out2] = captureImages(vidobj1,vidobj2,FringePattern,ScreenNum,Pa
     %Create videoinput object
    monitor_info = get(0,'MonitorPosition');
 %     VideoResolution =  get(vidobj, 'VideoResolution');  
+    vidobj1.Resolution = '3264x2448';
+    vidobj2.Resolution = '3264x2448';
     WebcamRes = get(vidobj1, 'Resolution');
     VideoResolution(1) = str2num(WebcamRes(1:4));
     VideoResolution(2) = str2num(WebcamRes(6:end));
@@ -18,9 +20,9 @@ function [out1, out2] = captureImages(vidobj1,vidobj2,FringePattern,ScreenNum,Pa
     fullscreen(FringePattern(:,:,1),ScreenNum)
     [Proj_H, Proj_W] = size(FringePattern(:,:,1));
     VerticalLine = zeros(Proj_H,Proj_W);
-    VerticalLine(:,Proj_W/2:Proj_W/2+1) = 255;
+    VerticalLine(:,round(Proj_W/2)) = 255;
     HorizontalLine = zeros(Proj_H,Proj_W);
-    HorizontalLine(Proj_H/2:Proj_H/2+1,:) = 255;
+    HorizontalLine(round(Proj_H/2),:) = 255;
     RedScreen = zeros(Proj_H,Proj_W,3);
     RedScreen(:,:,1) = 255;
     

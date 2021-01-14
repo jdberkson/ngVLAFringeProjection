@@ -1,16 +1,16 @@
 clc; clear all; close all;
-[I1, I2] = ProjectFringesAndCenterline(40,40);
+[I1, I2] = ProjectFringesAndCenterline(40,100);
 [M,N] = size(I1(:,:,1));
-I_row1 = zeros(M,N,4);
-I_column1 = zeros(M,N,4);
-I_row2 = zeros(M,N,4);
-I_column2 = zeros(M,N,4);
-for i = 1:4
+I_row1 = zeros(M,N,8);
+I_column1 = zeros(M,N,8);
+I_row2 = zeros(M,N,8);
+I_column2 = zeros(M,N,8);
+for i = 1:8
     I_row1(:,:,i) = I1(:,:,i);
-    I_column1(:,:,i) = I1(:,:,i+4);    
+    I_column1(:,:,i) = I1(:,:,i+8);    
 
     I_row2(:,:,i) = I2(:,:,i);
-    I_column2(:,:,i) = I2(:,:,i+4);
+    I_column2(:,:,i) = I2(:,:,i+8);
 end
 
 [wrappedPhase_row1,modulation_row1] = Equal_step(I_row1); 
@@ -19,31 +19,43 @@ end
 [wrappedPhase_column2,modulation_column2] = Equal_step(I_column2);
 
 
-modulationThreshold = 0.05;
-% Combine the two modulation data sets to create a mask
-mask1 = modulation_row1+modulation_column1;
-% Normalize the data
-mask1 = mask1./max(mask1(:));
-% Apply modulation threshold
-mask1(mask1<modulationThreshold) = 0;
-% Create a mask of 1's and 0's
-mask1(mask1>(modulationThreshold-0.01)) = 1;
-mask1(isnan(mask1)) = 0;
-mask1 = imfill(mask1,'holes');
-mask1 = double(bwareaopen(mask1,1000));
-mask1(mask1==0) = NaN;
+% modulationThreshold = 0.3;
+% % Combine the two modulation data sets to create a mask
+% mask1 = modulation_row1+modulation_column1;
+% % Normalize the data
+% mask1 = mask1./max(mask1(:));
+% % Apply modulation threshold
+% mask1(mask1<modulationThreshold) = 0;
+% % Create a mask of 1's and 0's
+% mask1(mask1>(modulationThreshold-0.01)) = 1;
+% mask1(isnan(mask1)) = 0;
+% mask1 = imfill(mask1,'holes');
+% mask1 = double(bwareaopen(mask1,1000));
+% mask1(mask1==0) = NaN;
+% 
+% % Combine the two modulation data sets to create a mask
+% mask2 = modulation_row2+modulation_column2;
+% % Normalize the data
+% mask2 = mask2./max(mask2(:));
+% % Apply modulation threshold
+% mask2(mask2<modulationThreshold) = 0;
+% % Create a mask of 1's and 0's
+% mask2(mask2>(modulationThreshold-0.01)) = 1;
+% mask2(isnan(mask2)) = 0;
+% mask2 = imfill(mask2,'holes');
+% mask2 = double(bwareaopen(mask2,1000));
+% mask2(mask2==0) = NaN;
+figure
+imagesc(wrappedPhase_row1)
+[x,y] = ginput(4);
+mask1 = poly2mask(x,y,2448,3264);
 
-% Combine the two modulation data sets to create a mask
-mask2 = modulation_row2+modulation_column2;
-% Normalize the data
-mask2 = mask2./max(mask2(:));
-% Apply modulation threshold
-mask2(mask2<modulationThreshold) = 0;
-% Create a mask of 1's and 0's
-mask2(mask2>(modulationThreshold-0.01)) = 1;
-mask2(isnan(mask2)) = 0;
-mask2 = imfill(mask2,'holes');
-mask2 = double(bwareaopen(mask2,1000));
+mask1 = double(mask1);
+mask1(mask1==0) = NaN;
+imagesc(wrappedPhase_row2)
+[x,y] = ginput(4);
+mask2 = poly2mask(x,y,2448,3264);
+mask2 = double(mask2);
 mask2(mask2==0) = NaN;
 
 
@@ -70,7 +82,7 @@ imagesc(unwrapped_col2);colorbar;
 title('Camera 2')
 
 figure
-VerticalLine = I1(:,:,9).*mask1;
+VerticalLine = I1(:,:,17).*mask1;
 imagesc(VerticalLine)
 title('Select brightest point in background')
 [x,y] = ginput(1);
@@ -82,7 +94,7 @@ imagesc(VerticalLine)
 PhaseOffsetVert1 = mean(unwrapped_col1(VerticalLine==1));
 unwrapped_col1_adj = unwrapped_col1-PhaseOffsetVert1;
 
-VerticalLine = I2(:,:,9).*mask2;
+VerticalLine = I2(:,:,17).*mask2;
 imagesc(VerticalLine)
 title('Select brightest point in background')
 [x,y] = ginput(1);
@@ -94,7 +106,7 @@ imagesc(VerticalLine)
 PhaseOffsetVert2 = mean(unwrapped_col2(VerticalLine==1));
 unwrapped_col2_adj = unwrapped_col2-PhaseOffsetVert2;
 
-HorizontalLine = I1(:,:,10).*mask1;
+HorizontalLine = I1(:,:,18).*mask1;
 imagesc(HorizontalLine)
 title('Select brightest point in background')
 [x,y] = ginput(1);
@@ -106,7 +118,7 @@ imagesc(HorizontalLine)
 PhaseOffsetHoriz1 = mean(unwrapped_row1(HorizontalLine==1));
 unwrapped_row1_adj = unwrapped_row1-PhaseOffsetHoriz1;
 
-HorizontalLine = I2(:,:,10).*mask2;
+HorizontalLine = I2(:,:,18).*mask2;
 imagesc(HorizontalLine)
 title('Select brightest point in background')
 [x,y] = ginput(1);
@@ -137,9 +149,31 @@ subplot(1,2,2)
 imagesc(unwrapped_col2_adj);colorbar;
 title('Camera 2')
 
+cam1H = imgaussfilt(unwrapped_row1_adj,5);
+cam1V = imgaussfilt(unwrapped_col1_adj,5);
+cam2H = imgaussfilt(unwrapped_row2_adj,5);
+cam2V = imgaussfilt(unwrapped_col2_adj,5);
+% cam1H = unwrapped_row1_adj;
+% cam1V = unwrapped_col1_adj;
+% cam2H = unwrapped_row2_adj;
+% cam2V = unwrapped_col2_adj;
 
+stereoCalFilename = uigetfile('*.mat');
+load(stereoCalFilename);
+% cam1H = undistortImage(cam1H,stereoParams.CameraParameters1);
+% cam1V = undistortImage(cam1V,stereoParams.CameraParameters1);
+% cam2H = undistortImage(cam2H,stereoParams.CameraP[arameters2);
+% cam2V = undistortImage(cam2V,stereoParams.CameraParameters2);
 
+[matchedPoints1, matchedPoints2] = coordinateSolve(cam1H, cam1V, cam2H, cam2V);
 
+matchedPoints1 = undistortPoints(matchedPoints1',stereoParams.CameraParameters2);
+matchedPoints2 = undistortPoints(matchedPoints2',stereoParams.CameraParameters1);
+[worldPoints, reprojError] = triangulate(matchedPoints2,matchedPoints1,stereoParams);
+worldPoints = rmoutliers(worldPoints);
 
+X = worldPoints(:,1); Y = worldPoints(:,2); Z = worldPoints(:,3);
 
+figure
+scatter3(X,Y,Z)
 
