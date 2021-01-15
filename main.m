@@ -165,7 +165,7 @@ cam1V = undistortImage(cam1V,stereoParams.CameraParameters1);
 cam2H = undistortImage(cam2H,stereoParams.CameraParameters2);
 cam2V = undistortImage(cam2V,stereoParams.CameraParameters2);
 
-[matchedPoints1, matchedPoints2] = coordinateSolve(cam1H, cam1V, cam2H, cam2V);
+[matchedPoints1, matchedPoints2] = coordinateSolve(cam1H, cam1V, cam2H, cam2V,0);
 
 % matchedPoints1 = undistortPoints(matchedPoints1',stereoParams.CameraParameters2);
 % matchedPoints2 = undistortPoints(matchedPoints2',stereoParams.CameraParameters1);
@@ -183,7 +183,7 @@ subplot(1,2,1)
 pcshow(ptc,'MarkerSize',15)
 
 xlabel('X');ylabel('Y');zlabel('Z')
-planefit = pcfitplane(ptc,10);
+planefit = pcfitplane(ptc,5);
 n = planefit.Normal;
 theta = -pi/2+atan(n(3)/n(2));
 phi = pi/2-atan(n(3)/n(1));
@@ -216,3 +216,7 @@ subplot(1,2,2)
 pcshow(ptc,'MarkerSize',200)
 
 xlabel('X');ylabel('Y');zlabel('Z')
+
+zlim('manual')
+zlim([-40,20]); axis square
+

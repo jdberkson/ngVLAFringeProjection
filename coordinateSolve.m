@@ -37,17 +37,17 @@ warning('off','all')
 % Coords = coeffMinv*PhaseM';
 % X = Coords(2,:);
 % Y = Coords(3,:);
-scale = 5;
+scale = 12;
 cam2H = imresize(cam2H,scale);
 cam2V = imresize(cam2V,scale);
 
 [M,N] = size(cam1H);
-cam2H = round(cam2H,4);
-cam2V = round(cam2V,4);
+cam2H = round(cam2H,3);
+cam2V = round(cam2V,3);
 
 
-cam1H = round(cam1H,4);
-cam1V = round(cam1V,4);
+cam1H = round(cam1H,3);
+cam1V = round(cam1V,3);
 
 figure
 imagesc(cam1H)
@@ -71,10 +71,12 @@ subplot(1,2,1)
 imagesc(cam1H); hold on;
 subplot(1,2,2)
 imagesc(imresize(cam2H,1/scale)); hold on;
-f = figure;
-for i = y(3):100:y(4)
+if debugON
+    f = figure;
+end
+for i = y(3):25:y(4)
    
-    for j = x(1):100:x(2)
+    for j = x(1):25:x(2)
         matchedPointsX = [matchedPointsX j];
         matchedPointsY = [matchedPointsY i];
         [indHx indHy] = find(cam2H == cam1H(i,j));
@@ -94,12 +96,12 @@ for i = y(3):100:y(4)
             matchedPointsY(end) = [];
         end
         if debugON
-            close(f)
-            f = figure;
+            
             imagesc(imresize(cam2H,1/scale)); hold on;
             scatter(indHy/scale,indHx/scale)
             scatter(indVy/scale,indVx/scale)
             scatter(x_intersecttemp/scale,y_intersecttemp/scale)
+            hold off
         end
        
     end
