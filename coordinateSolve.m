@@ -1,4 +1,4 @@
-function [matchedPoints1 matchedPoints2] = coordinateSolve(cam1H, cam1V, cam2H, cam2V)
+function [matchedPoints1 matchedPoints2] = coordinateSolve(cam1H, cam1V, cam2H, cam2V,debugON)
 
 %for debug purposes
 % cam1H = unwrapped_row1_adj;
@@ -37,17 +37,17 @@ warning('off','all')
 % Coords = coeffMinv*PhaseM';
 % X = Coords(2,:);
 % Y = Coords(3,:);
-scale = 2;
+scale = 5;
 cam2H = imresize(cam2H,scale);
 cam2V = imresize(cam2V,scale);
 
 [M,N] = size(cam1H);
-cam2H = round(cam2H,3);
-cam2V = round(cam2V,3);
+cam2H = round(cam2H,4);
+cam2V = round(cam2V,4);
 
 
-cam1H = round(cam1H,3);
-cam1V = round(cam1V,3);
+cam1H = round(cam1H,4);
+cam1V = round(cam1V,4);
 
 figure
 imagesc(cam1H)
@@ -71,7 +71,7 @@ subplot(1,2,1)
 imagesc(cam1H); hold on;
 subplot(1,2,2)
 imagesc(imresize(cam2H,1/scale)); hold on;
-
+f = figure;
 for i = y(3):100:y(4)
    
     for j = x(1):100:x(2)
@@ -80,19 +80,27 @@ for i = y(3):100:y(4)
         [indHx indHy] = find(cam2H == cam1H(i,j));
         [indVx indVy] = find(cam2V == cam1V(i,j));
       
-        p1 = polyfit(indHy,indHx,3);
-        p2 = polyfit(indVy,indVx,3);
-%         close(f)
-%         f = figure;
-%         imagesc(imresize(cam2H,1/scale)); hold on;
-%         scatter(indHy/scale,indHx/scale)
-%         scatter(indVy/scale,indVx/scale)
+        p1 = polyfit(indHy,indHx,5);
+        p2 = polyfit(indVy,indVx,5);
+
         %calculate intersection
         x_intersecttemp = fzero(@(x) polyval(p1-p2,x),0);
         y_intersecttemp = polyval(p1,x_intersecttemp);
-        x_intersect = [x_intersect x_intersecttemp/scale];
-        y_intersect = [y_intersect y_intersecttemp/scale];
-%        scatter(y_intersecttemp/5,x_intersecttemp/5)
+        if x_intersecttemp > 0 && y_intersecttemp > 0
+            x_intersect = [x_intersect x_intersecttemp/scale];
+            y_intersect = [y_intersect y_intersecttemp/scale];
+        else
+            matchedPointsX(end) = [];
+            matchedPointsY(end) = [];
+        end
+        if debugON
+            close(f)
+            f = figure;
+            imagesc(imresize(cam2H,1/scale)); hold on;
+            scatter(indHy/scale,indHx/scale)
+            scatter(indVy/scale,indVx/scale)
+            scatter(x_intersecttemp/scale,y_intersecttemp/scale)
+        end
        
     end
 end

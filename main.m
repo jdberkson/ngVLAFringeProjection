@@ -149,10 +149,10 @@ subplot(1,2,2)
 imagesc(unwrapped_col2_adj);colorbar;
 title('Camera 2')
 
-cam1H = imgaussfilt(unwrapped_row1_adj,5);
-cam1V = imgaussfilt(unwrapped_col1_adj,5);
-cam2H = imgaussfilt(unwrapped_row2_adj,5);
-cam2V = imgaussfilt(unwrapped_col2_adj,5);
+cam1H = imgaussfilt(unwrapped_row1_adj,10);
+cam1V = imgaussfilt(unwrapped_col1_adj,10);
+cam2H = imgaussfilt(unwrapped_row2_adj,10);
+cam2V = imgaussfilt(unwrapped_col2_adj,10);
 % cam1H = unwrapped_row1_adj;
 % cam1V = unwrapped_col1_adj;
 % cam2H = unwrapped_row2_adj;
@@ -174,5 +174,45 @@ worldPoints = rmoutliers(worldPoints);
 X = worldPoints(:,1); Y = worldPoints(:,2); Z = worldPoints(:,3);
 
 figure
-scatter3(X,Y,Z)
+scatter3(X,Y,Z,'.')
 
+XYZ = [X Y Z];
+ptc = pointCloud(XYZ);
+figure
+subplot(1,2,1)
+pcshow(ptc,'MarkerSize',15)
+
+xlabel('X');ylabel('Y');zlabel('Z')
+planefit = pcfitplane(ptc,10);
+n = planefit.Normal;
+theta = -pi/2+atan(n(3)/n(2));
+phi = pi/2-atan(n(3)/n(1));
+% zeta = atan(n(2)/n(1));
+
+Rx = [1 0 0 0;0 cos(theta) -sin(theta) 0 ;0 sin(theta) cos(theta) 0; 0 0 0 1];
+Ry = [cos(phi) 0 sin(phi) 0;0 1 0 0;-sin(phi) 0 cos(phi) 0; 0 0 0 1];
+% Rz = [cos(zeta) -sin(zeta) 0 0; sin(zeta) cos(zeta) 0 0;0 0 1 0; 0 0 0 1];
+
+Rx = affine3d(Rx);
+Ry = affine3d(Ry);
+% Rz = affine3d(Rz);
+
+ptc = pctransform(ptc,Rx);
+ptc = pctransform(ptc,Ry);
+% % 
+% ptc = pctransform(ptc,Rz);
+
+subplot(1,2,2)
+pcshow(ptc,'MarkerSize',50)
+
+xlabel('X');ylabel('Y');zlabel('Z')
+
+Xc = ptc.Location(:,1) - mean(ptc.Location(:,1));
+Yc = ptc.Location(:,2) - mean(ptc.Location(:,2));
+Zc = ptc.Location(:,3) - mean(ptc.Location(:,3));
+XYZc = [Xc Yc Zc];
+ptc = pointCloud(XYZc);
+subplot(1,2,2)
+pcshow(ptc,'MarkerSize',200)
+
+xlabel('X');ylabel('Y');zlabel('Z')
