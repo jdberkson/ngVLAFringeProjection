@@ -37,7 +37,7 @@ warning('off','all')
 % Coords = coeffMinv*PhaseM';
 % X = Coords(2,:);
 % Y = Coords(3,:);
-scale = 12;
+scale = 2;
 cam2H = imresize(cam2H,scale);
 cam2V = imresize(cam2V,scale);
 
@@ -74,9 +74,11 @@ imagesc(imresize(cam2H,1/scale)); hold on;
 if debugON
     f = figure;
 end
-for i = y(3):25:y(4)
+x = [1800 3000 0 0];
+y = [0 0 500 2000];
+for i = y(3):200:y(4)
    
-    for j = x(1):25:x(2)
+    for j = x(1):200:x(2)
         matchedPointsX = [matchedPointsX j];
         matchedPointsY = [matchedPointsY i];
         [indHx indHy] = find(cam2H == cam1H(i,j));
@@ -86,7 +88,7 @@ for i = y(3):25:y(4)
         p2 = polyfit(indVy,indVx,5);
 
         %calculate intersection
-        x_intersecttemp = fzero(@(x) polyval(p1-p2,x),0);
+        x_intersecttemp = fzero(@(x) polyval(p1-p2,x),N/2);
         y_intersecttemp = polyval(p1,x_intersecttemp);
         if x_intersecttemp > 0 && y_intersecttemp > 0
             x_intersect = [x_intersect x_intersecttemp/scale];

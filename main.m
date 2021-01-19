@@ -186,7 +186,7 @@ xlabel('X');ylabel('Y');zlabel('Z')
 planefit = pcfitplane(ptc,5);
 n = planefit.Normal;
 theta = -pi/2+atan(n(3)/n(2));
-phi = pi/2-atan(n(3)/n(1));
+phi = -pi/2+atan(n(3)/n(1));
 % zeta = atan(n(2)/n(1));
 
 Rx = [1 0 0 0;0 cos(theta) -sin(theta) 0 ;0 sin(theta) cos(theta) 0; 0 0 0 1];
@@ -218,5 +218,5 @@ pcshow(ptc,'MarkerSize',200)
 xlabel('X');ylabel('Y');zlabel('Z')
 
 zlim('manual')
-zlim([-40,20]); axis square
+zlim([-5,5]); axis square
 
