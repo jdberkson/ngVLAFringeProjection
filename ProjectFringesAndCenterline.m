@@ -9,7 +9,7 @@ function [ImageStack1, ImageStack2] = ProjectFringesAndCenterline(RowPeriod,Colu
     PatternPars.Steps = 8;
     PatternPars.ContrastScale = 1;
     PatternPars.Average = 5;
-    PatternPars.Interval = 2;
+    PatternPars.Interval = 4;
 
     FringePattern = createFringePattern(ProjPars,PatternPars);
   

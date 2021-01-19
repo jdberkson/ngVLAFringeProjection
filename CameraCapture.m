@@ -20,7 +20,7 @@ edtbox = uicontrol('style','edit','string','STARTING','units','normalized',...
     'position',edtpos,'fontsize',62,'foregroundcolor','r');
 
 %variables
-secs = 30;
+secs = 20;
 numImages = 15;
 min = 0;
 elapsedTime = 0;
