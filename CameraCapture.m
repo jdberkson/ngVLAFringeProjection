@@ -59,6 +59,7 @@ for j = 1:numImages
         imwrite(I_cam1,filenameFinal_cam1);
         I_cam2 = snapshot(vid2);
         imwrite(I_cam2,filenameFinal_cam2);
+        elapsedTime = 0;
     end
 end
 
