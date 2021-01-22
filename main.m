@@ -1,5 +1,5 @@
 clc; clear all; close all;
-[I1, I2] = ProjectFringesAndCenterline(10,40);
+[I1, I2] = ProjectFringesAndCenterline(20,80);
 [M,N] = size(I1(:,:,1));
 I_row1 = zeros(M,N,8);
 I_column1 = zeros(M,N,8);
@@ -185,10 +185,10 @@ subplot(1,2,1)
 pcshow(ptc,'MarkerSize',15)
 
 xlabel('X');ylabel('Y');zlabel('Z')
-planefit = pcfitplane(ptc,5);
+planefit = pcfitplane(ptc,1);
 n = planefit.Normal;
 theta = -pi/2+atan(n(3)/n(2));
-phi = -pi/2+atan(n(3)/n(1));
+phi = pi/2-atan(n(3)/n(1));
 % zeta = atan(n(2)/n(1));
 
 Rx = [1 0 0 0;0 cos(theta) -sin(theta) 0 ;0 sin(theta) cos(theta) 0; 0 0 0 1];

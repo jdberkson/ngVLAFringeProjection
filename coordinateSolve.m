@@ -76,12 +76,12 @@ if debugON
     f = figure;
 end
 
-x = [1800 3000 0 0];
-
-y = [0 0 500 2000];
-for i = y(3):100:y(4)
+x = [1305;1588;1430;1438];
+% 
+y = [738;726;688;763];
+for i = y(3):5:y(4)
    
-    for j = x(1):100:x(2)
+    for j = x(1):5:x(2)
         matchedPointsX = [matchedPointsX j];
         matchedPointsY = [matchedPointsY i];
         [indHx indHy] = find(cam2H == cam1H(i,j));
@@ -91,7 +91,7 @@ for i = y(3):100:y(4)
         p2 = polyfit(indVy,indVx,3);
 
         %calculate intersection
-        x_intersecttemp = fzero(@(x) polyval(p1-p2,x),N/2);
+        x_intersecttemp = fzero(@(x) polyval(p1-p2,x),abs(y(3)+y(4))/2);
         y_intersecttemp = polyval(p1,x_intersecttemp);
         if x_intersecttemp > 0 && y_intersecttemp > 0
             x_intersect = [x_intersect x_intersecttemp/scale];
