@@ -1,5 +1,5 @@
 clc; clear all; close all;
-[I1, I2] = ProjectFringesAndCenterline(20,80);
+[I1, I2] = ProjectFringesAndCenterline(40,120);
 [M,N] = size(I1(:,:,1));
 I_row1 = zeros(M,N,8);
 I_column1 = zeros(M,N,8);
@@ -149,10 +149,10 @@ subplot(1,2,2)
 imagesc(unwrapped_col2_adj);colorbar;
 title('Camera 2')
 
-cam1H = imgaussfilt(unwrapped_row1_adj,10);
-cam1V = imgaussfilt(unwrapped_col1_adj,10);
-cam2H = imgaussfilt(unwrapped_row2_adj,10);
-cam2V = imgaussfilt(unwrapped_col2_adj,10);
+cam1H = imgaussfilt(unwrapped_row1_adj,15);
+cam1V = imgaussfilt(unwrapped_col1_adj,15);
+cam2H = imgaussfilt(unwrapped_row2_adj,15);
+cam2V = imgaussfilt(unwrapped_col2_adj,15);
 % cam1H = unwrapped_row1_adj;
 % cam1V = unwrapped_col1_adj;
 % cam2H = unwrapped_row2_adj;
@@ -165,9 +165,7 @@ cam1V = undistortImage(cam1V,stereoParams.CameraParameters1);
 cam2H = undistortImage(cam2H,stereoParams.CameraParameters2);
 cam2V = undistortImage(cam2V,stereoParams.CameraParameters2);
 
-
-
-[matchedPoints1, matchedPoints2] = coordinateSolve(cam1H, cam1V, cam2H, cam2V,1);
+[matchedPoints1, matchedPoints2] = coordinateSolve(cam1H, cam1V, cam2H, cam2V,0);
 
 % matchedPoints1 = undistortPoints(matchedPoints1',stereoParams.CameraParameters2);
 % matchedPoints2 = undistortPoints(matchedPoints2',stereoParams.CameraParameters1);
@@ -185,7 +183,7 @@ subplot(1,2,1)
 pcshow(ptc,'MarkerSize',15)
 
 xlabel('X');ylabel('Y');zlabel('Z')
-planefit = pcfitplane(ptc,1);
+planefit = pcfitplane(ptc,20);
 n = planefit.Normal;
 theta = -pi/2+atan(n(3)/n(2));
 phi = pi/2-atan(n(3)/n(1));
@@ -220,5 +218,10 @@ pcshow(ptc,'MarkerSize',200)
 xlabel('X');ylabel('Y');zlabel('Z')
 
 zlim('manual')
-zlim([-5,5]); axis square
+axis square
+
+[xi,yi,zi] = InterpolateXY(X,Y,Z);
+zi_p = removePlane(zi);
+figure
+imagesc(zi_p); colorbar
 

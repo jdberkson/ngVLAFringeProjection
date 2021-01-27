@@ -23,9 +23,6 @@ function [out1, out2] = captureImages(vidobj1,vidobj2,FringePattern,ScreenNum,Pa
     VerticalLine(:,round(Proj_W/2)) = 255;
     HorizontalLine = zeros(Proj_H,Proj_W);
     HorizontalLine(round(Proj_H/2),:) = 255;
-    RedScreen = zeros(Proj_H,Proj_W,3);
-    RedScreen(:,:,1) = 255;
-    
  
     RepNum = 2*PatternPars.Steps;
     %Preallocate Image arrays
@@ -35,11 +32,9 @@ function [out1, out2] = captureImages(vidobj1,vidobj2,FringePattern,ScreenNum,Pa
     CapturedImage1 = zeros(VideoResolution(2),VideoResolution(1),RepNum);
     CapturedImage2 = zeros(VideoResolution(2),VideoResolution(1),RepNum);
     k = 1;
-    figure; 
+    figure; subplot(1,2,1);title('Camera 1');subplot(1,2,2); title('Camera 2')
     for i=1:RepNum
         
-%         image(uint8(FringePattern(:,:,i)))
-%         set(gcf,'Position',[monitor_info(2,:)]);
         fullscreen(uint8(FringePattern(:,:,i)),2)
 
         pause(PatternPars.Interval)
@@ -49,17 +44,18 @@ function [out1, out2] = captureImages(vidobj1,vidobj2,FringePattern,ScreenNum,Pa
             Snapshot1(:,:,j) = rgb2gray(snapshot(vidobj1));
             Snapshot2(:,:,j) = rgb2gray(snapshot(vidobj2));
         end
+        
         %Average the snapshot stack
         AvgSnapshot1 = sum(Snapshot1,3)/PatternPars.Average;   
         AvgSnapshot2 = sum(Snapshot2,3)/PatternPars.Average;
         %Append the image stack
+        subplot(1,2,1); imagesc(AvgSnapshot1);
+        subplot(1,2,2); imagesc(AvgSnapshot2); drawnow;
         CapturedImage1(:,:,k) = AvgSnapshot1;
         CapturedImage2(:,:,k) = AvgSnapshot2;
         k = k+1;
     end
     
-%     image(uint8(VerticalLine))
-%     set(gcf,'Position',[monitor_info(2,:)]);
     fullscreen(uint8(VerticalLine),2)
     pause(PatternPars.Interval)
     for j=1:PatternPars.Average            
@@ -69,12 +65,12 @@ function [out1, out2] = captureImages(vidobj1,vidobj2,FringePattern,ScreenNum,Pa
     %Average the snapshot stack
     AvgSnapshot1 = sum(Snapshot1,3)/PatternPars.Average;   
     AvgSnapshot2 = sum(Snapshot2,3)/PatternPars.Average;  
+    subplot(1,2,1); imagesc(AvgSnapshot1);
+    subplot(1,2,2); imagesc(AvgSnapshot2); drawnow;
     CapturedImage1(:,:,end+1) = AvgSnapshot1;
     CapturedImage2(:,:,end+1) = AvgSnapshot2;
-    
-%     image(uint8(HorizontalLine))
-%     set(gcf,'Position',[monitor_info(2,:)]);
-        fullscreen(uint8(HorizontalLine),2)
+
+    fullscreen(uint8(HorizontalLine),2)
 
     pause(PatternPars.Interval)
     for j=1:PatternPars.Average            
@@ -84,24 +80,11 @@ function [out1, out2] = captureImages(vidobj1,vidobj2,FringePattern,ScreenNum,Pa
     %Average the snapshot stack
     AvgSnapshot1 = sum(Snapshot1,3)/PatternPars.Average;   
     AvgSnapshot2 = sum(Snapshot2,3)/PatternPars.Average;  
+    subplot(1,2,1); imagesc(AvgSnapshot1);
+    subplot(1,2,2); imagesc(AvgSnapshot2); drawnow;
     CapturedImage1(:,:,end+1) = AvgSnapshot1;
     CapturedImage2(:,:,end+1) = AvgSnapshot2;
     
-%     close all;
-%     imagesc(CapturedImage1(:,:,1));
-%     [x,y] = ginput(2);
-%     CapturedImage1(1:y(1),:,:) = NaN;
-%     CapturedImage1(y(2):end,:,:) = NaN;
-%     CapturedImage1(:,1:x(1),:) = NaN;
-%     CapturedImage1(:,x(2):end,:) = NaN;
-%     
-%     imagesc(CapturedImage2(:,:,1));
-%     [x,y] = ginput(2);
-%     CapturedImage2(1:y(1),:,:) = NaN;
-%     CapturedImage2(y(2):end,:,:) = NaN;
-%     CapturedImage2(:,1:x(1),:) = NaN;
-%     CapturedImage2(:,x(2):end,:) = NaN;
-%     close all;
     %Set output to image stack
     out1 = CapturedImage1;
     out2 = CapturedImage2;
