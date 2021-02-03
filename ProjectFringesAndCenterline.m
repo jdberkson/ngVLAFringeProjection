@@ -17,10 +17,10 @@ function [ImageStack1, ImageStack2] = ProjectFringesAndCenterline(RowPeriod,Colu
     vid2 = webcam(2);
     vid1.Resolution = '3264x2448';
     vid2.Resolution = '3264x2448';
-    vid1.Gain = 50;
-    vid2.Gain = 50;
-    vid1.Brightness = 45;
-    vid2.Brightness = 45;
+    vid1.Gain = 80;
+    vid2.Gain = 80;
+    vid1.Brightness = 50;
+    vid2.Brightness = 50;
     [ImageStack1, ImageStack2] = captureImages(vid1,vid2,FringePattern,2,PatternPars);
     
 end

@@ -59,13 +59,6 @@ matchedPointsY = [];
 x_intersect = [];
 y_intersect = [];
 close all;
-figure
-imagesc(cam1H)
-title('click the middle of the object')
-[x,y] = ginput(1);
-
-cam1H = CropAperture(cam1H,10);
-cam1V = CropAperture(cam1V,10);
 
 figure
 subplot(1,2,1)
@@ -80,34 +73,50 @@ end
 % % 
 % y = [738;726;688;763];
 
-for i = 1:100:M
+for i = 1:50:M
     
-    for j = 1:100:N
+    for j = 1:50:N
         if ~isnan(cam1H(i,j)) 
             matchedPointsX = [matchedPointsX j];
             matchedPointsY = [matchedPointsY i];
             [indHx indHy] = find(cam2H == cam1H(i,j));
             [indVx indVy] = find(cam2V == cam1V(i,j));
 
-            p1 = polyfit(indHy,indHx,2);
-            p2 = polyfit(indVy,indVx,2);
-            try
-            %calculate intersection
-            x_intersecttemp = fzero(@(x) polyval(p1-p2,x),y);
-            y_intersecttemp = polyval(p1,x_intersecttemp);
+            p1 = polyfit(indHy,indHx,7);
+            p2 = polyfit(indVy,indVx,7);
             
-            if x_intersecttemp > 0 && y_intersecttemp > 0
+            %calculate intersection
+            %find the boundaries of the intersection
+            minxH = min(indHy);
+            maxxH = max(indHy);
+            minxV = min(indVy);
+            maxxV = max(indVy);
+            
+            xlims = [minxH maxxH minxV maxxV];
+            [m,Imin] = min(xlims);
+            xlims(Imin) = [];
+            [m,Imax] = max(xlims);
+            xlims(Imax) = [];
+            try
+            stpt = mean(xlims);
+          
+     
+            x_intersecttemp = fzero(@(x) polyval(p1-p2,x),stpt);
+            y_intersecttemp = polyval(p1,x_intersecttemp);
+            catch
+            end
+            if y_intersecttemp > 0 && x_intersecttemp > 0 && y_intersecttemp < M*scale && x_intersecttemp < N*scale && ~isnan(cam2H(round(y_intersecttemp),round(x_intersecttemp)))
                 x_intersect = [x_intersect x_intersecttemp/scale];
                 y_intersect = [y_intersect y_intersecttemp/scale];
             else
                 matchedPointsX(end) = [];
                 matchedPointsY(end) = [];
             end
-            catch
-            end
+           
+            
 %             x_intersecttemp = roots(p1-p2);
 %             y_intersecttemp = polyval(p1,x_intersecttemp);
-%             root_ind = find(y_intesecttemp > 0 & y_intersecttemp < M & x_intesecttemp > 0 & x_intersecttemp < N);
+%             root_ind = find(y_intesecttemp > miny & y_intersecttemp < maxy & x_intesecttemp > minx & x_intersecttemp < maxx);
 %             x_intersecttemp = x_intersecttemp(root_ind(1));
 %             y_intersecttemp = y_intersecttemp(root_ind(1));
             if debugON
@@ -115,7 +124,7 @@ for i = 1:100:M
                 imagesc(imresize(cam2H,1/scale)); hold on;
                 scatter(indHy/scale,indHx/scale)
                 scatter(indVy/scale,indVx/scale)
-                scatter(x_intersecttemp/scale,y_intersecttemp/scale)
+                scatter(x_intersecttemp/scale,y_intersecttemp/scale,'*','k','LineWidth',10)
                 hold off
             end
         
@@ -127,7 +136,7 @@ subplot(1,2,1)
 imagesc(cam1H); hold on;
 scatter(matchedPointsX,matchedPointsY);
 subplot(1,2,2)
-imagesc(cam2H); hold on;
+imagesc(imresize(cam2H,1/scale)); hold on;
 scatter(x_intersect,y_intersect,'*')
 
 matchedPoints1 = [matchedPointsX;matchedPointsY];
