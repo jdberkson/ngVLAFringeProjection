@@ -24,8 +24,6 @@ filenameFinal1 = strcat(pwd, '\', 'calibration_check_pic1.png');
 filenameFinal2 = strcat(pwd, '\', 'calibration_check_pic2.png');
 
 %countdown for 1 image
-%NOTE: edit this for two cameras. You'll also need to change the camera
-%settings at the beginning. Just use Joel's code from github
 for k = 1:secs
     elapsedTime = elapsedTime + 1;
     set(edtbox,'string',...
