@@ -61,9 +61,6 @@ end
 imageFileNames1(1, numImages + 1) = filenameFinal1;
 imageFileNames2(1, numImages + 1) = filenameFinal2;
 
-%obtain the original reprojection error
-reprojErrors = currStereoParams.ReprojectionErrors;
-
 % Detect checkerboards in images
 [imagePoints, boardSize, imagesUsed] = detectCheckerboardPoints(imageFileNames1, imageFileNames2);
 
@@ -115,7 +112,7 @@ AED = AED/CCsize(1);
 
 OGReprojError = currStereoParams.MeanReprojectionError;
 
-fprintf('Calibration Check Image Set Reprojection Error:    %6.4f\n', AED);
+fprintf('Calibration Check Reprojection Error:              %6.4f\n', AED);
 fprintf('Original Calibration Image Set Reprojection Error: %6.4f\n', OGReprojError);
 
 end
