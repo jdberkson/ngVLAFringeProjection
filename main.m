@@ -1,5 +1,5 @@
 clc; clear all; close all;
-[I1, I2] = ProjectFringesAndCenterline(40,120);
+[I1, I2] = ProjectFringesAndCenterline(20,60);
 [M,N] = size(I1(:,:,1));
 I_row1 = zeros(M,N,8);
 I_column1 = zeros(M,N,8);
@@ -149,10 +149,10 @@ subplot(1,2,2)
 imagesc(unwrapped_col2_adj);colorbar;
 title('Camera 2')
 
-cam1H = imgaussfilt(unwrapped_row1_adj,20);
-cam1V = imgaussfilt(unwrapped_col1_adj,20);
-cam2H = imgaussfilt(unwrapped_row2_adj,20);
-cam2V = imgaussfilt(unwrapped_col2_adj,20);
+cam1H = imgaussfilt(unwrapped_row1_adj,10);
+cam1V = imgaussfilt(unwrapped_col1_adj,10);
+cam2H = imgaussfilt(unwrapped_row2_adj,10);
+cam2V = imgaussfilt(unwrapped_col2_adj,10);
 % cam1H = unwrapped_row1_adj;
 % cam1V = unwrapped_col1_adj;
 % cam2H = unwrapped_row2_adj;
@@ -223,6 +223,7 @@ Xc = ptc.Location(:,1);
 Yc = ptc.Location(:,2);
 Zc = ptc.Location(:,3);
 XYZc = [Xc Yc Zc];
+
 ptc = pointCloud(XYZc);
 subplot(1,2,2)
 pcshow(ptc,'MarkerSize',200)

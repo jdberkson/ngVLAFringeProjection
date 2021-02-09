@@ -21,6 +21,13 @@ function [ImageStack1, ImageStack2] = ProjectFringesAndCenterline(RowPeriod,Colu
     vid2.Gain = 80;
     vid1.Brightness = 50;
     vid2.Brightness = 50;
+    vid1.ExposureMode = 'manual';
+    vid2.ExposureMode = 'manual';
+    vid1.WhiteBalanceMode = 'manual';
+    vid2.WhiteBalanceMode = 'manual';
+
+    vid1.Exposure = -3;
+    vid2.Exposure = -3;
     [ImageStack1, ImageStack2] = captureImages(vid1,vid2,FringePattern,2,PatternPars);
     
 end

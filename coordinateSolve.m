@@ -50,6 +50,9 @@ cam2V = round(cam2V,3);
 cam1H = round(cam1H,3);
 cam1V = round(cam1V,3);
 
+cam1H = CropAperture(cam1H,25);
+cam1V = CropAperture(cam1V,25);
+
 figure
 imagesc(cam1H)
 hold on
@@ -73,18 +76,19 @@ end
 % % 
 % y = [738;726;688;763];
 
-for i = 1:50:M
+for i = 1:25:M
     
-    for j = 1:50:N
+    for j = 1:25:N
         if ~isnan(cam1H(i,j)) 
             matchedPointsX = [matchedPointsX j];
-            matchedPointsY = [matchedPointsY i];
+            matchedPointsY = [matchedPointsY i];tic;
             [indHx indHy] = find(cam2H == cam1H(i,j));
             [indVx indVy] = find(cam2V == cam1V(i,j));
-
-            p1 = polyfit(indHy,indHx,7);
-            p2 = polyfit(indVy,indVx,7);
-            
+            toc
+            tic
+            p1 = polyfit(indHy,indHx,5);
+            p2 = polyfit(indVy,indVx,5);
+            toc
             %calculate intersection
             %find the boundaries of the intersection
             minxH = min(indHy);
@@ -100,9 +104,10 @@ for i = 1:50:M
             try
             stpt = mean(xlims);
           
-     
+            tic
             x_intersecttemp = fzero(@(x) polyval(p1-p2,x),stpt);
             y_intersecttemp = polyval(p1,x_intersecttemp);
+            toc
             catch
             end
             if y_intersecttemp > 0 && x_intersecttemp > 0 && y_intersecttemp < M*scale && x_intersecttemp < N*scale && ~isnan(cam2H(round(y_intersecttemp),round(x_intersecttemp)))
