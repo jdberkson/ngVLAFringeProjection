@@ -38,9 +38,7 @@ warning('off','all')
 % X = Coords(2,:);
 % Y = Coords(3,:);
 
-scale = 2;
-cam2H = imresize(cam2H,scale);
-cam2V = imresize(cam2V,scale);
+scale = 1;
 
 [M,N] = size(cam1H);
 cam2H = round(cam2H,3);
@@ -50,12 +48,9 @@ cam2V = round(cam2V,3);
 cam1H = round(cam1H,3);
 cam1V = round(cam1V,3);
 
-cam1H = CropAperture(cam1H,25);
-cam1V = CropAperture(cam1V,25);
+% cam1H = CropAperture(cam1H,10);
+% cam1V = CropAperture(cam1V,10);
 
-figure
-imagesc(cam1H)
-hold on
 
 matchedPointsX = [];
 matchedPointsY = [];
@@ -72,23 +67,20 @@ if debugON
     f = figure;
 end
 
-% x = [1305;1588;1430;1438];
-% % 
-% y = [738;726;688;763];
 
-for i = 1:25:M
+for i = 1:10:M
     
-    for j = 1:25:N
-        if ~isnan(cam1H(i,j)) 
+    for j = 1:10:N
+        if ~isnan(cam1H(i,j)) %Check for valid point
+            %store sampled point on camera 1
             matchedPointsX = [matchedPointsX j];
-            matchedPointsY = [matchedPointsY i];tic;
-            [indHx indHy] = find(cam2H == cam1H(i,j));
-            [indVx indVy] = find(cam2V == cam1V(i,j));
-            toc
-            tic
-            p1 = polyfit(indHy,indHx,5);
-            p2 = polyfit(indVy,indVx,5);
-            toc
+            matchedPointsY = [matchedPointsY i];
+            
+            %find where the phases of the current point occurs in camera 2
+            [indHx, indHy] = find(cam2H == cam1H(i,j));
+            [indVx, indVy] = find(cam2V == cam1V(i,j));
+            
+           
             %calculate intersection
             %find the boundaries of the intersection
             minxH = min(indHy);
@@ -101,19 +93,34 @@ for i = 1:25:M
             xlims(Imin) = [];
             [m,Imax] = max(xlims);
             xlims(Imax) = [];
+            xlims = sort(xlims);
             try
+            %Fit the matched phase points to curves
+            Hcurve = fit(indHy,indHx,'fourier4');
+            Vcurve = fit(indVy,indVx,'fourier4');
+            
+            %calculate the starting point for finding the intersection
             stpt = mean(xlims);
-          
-            tic
-            x_intersecttemp = fzero(@(x) polyval(p1-p2,x),stpt);
-            y_intersecttemp = polyval(p1,x_intersecttemp);
-            toc
+            
+            %Calculate the x intersection and use it to find the y
+            %intersection
+            x_intersecttemp = fzero(@(x) Hcurve(x)-Vcurve(x),stpt);
+            y_intersecttemp = Vcurve(x_intersecttemp);
+            
             catch
             end
-            if y_intersecttemp > 0 && x_intersecttemp > 0 && y_intersecttemp < M*scale && x_intersecttemp < N*scale && ~isnan(cam2H(round(y_intersecttemp),round(x_intersecttemp)))
+            
+            %Make sure the calculated intersection point is reasonable, and
+            %not extrapolated
+            try
+            if y_intersecttemp > 0 && x_intersecttemp > xlims(1) && y_intersecttemp < M*scale && x_intersecttemp < xlims(2) && ~isnan(cam2H(round(y_intersecttemp),round(x_intersecttemp)))
                 x_intersect = [x_intersect x_intersecttemp/scale];
                 y_intersect = [y_intersect y_intersecttemp/scale];
             else
+                matchedPointsX(end) = [];
+                matchedPointsY(end) = [];
+            end
+            catch
                 matchedPointsX(end) = [];
                 matchedPointsY(end) = [];
             end
