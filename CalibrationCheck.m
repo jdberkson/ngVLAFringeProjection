@@ -86,10 +86,12 @@ I2 = imread(newCalibrationSet{1,2});
 % showdemo('DepthEstimationFromStereoVideoExample')
 
 %obtain the reprojection error of only the calibration check (CC) set of images
-CCReprojErrors = stereoParams.ReprojectionErrors(:, :, numImages + 1);
+numImages = size(newCalibrationSet);
+numImages = numImages(1);
+CCReprojErrors = stereoParams.ReprojectionErrors(:, :, numImages);
 
 %find the average Euclidean distance (AED) for the CC set
-CCsize = size(CCreprojErrors);
+CCsize = size(CCReprojErrors);
 AED = 0;
 
 for i = 1:CCsize(1)
