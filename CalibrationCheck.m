@@ -43,38 +43,12 @@ if elapsedTime >= secs
     elapsedTime = 0;
 end
 
-% %ask for the folders for camera 1 pictures, THEN camera 2 pictures
-% cameraDir1 = uigetdir;
-% cameraDir2 = uigetdir;
-% CameraDirContents1 = dir(fullfile(cameraDir1, '*.png'));
-% CameraDirContents2 = dir(fullfile(cameraDir2, '*.png'));
-% 
-% %find the number of sets of pictures
-% numImages = size(CameraDirContents1);
-% imageFileNames1 = {1, numImages + 1};
-% imageFileNames2 = {1, numImages + 1};
-% 
-% %obtain the names for the pictures
-% for i = 1:numImages(1)
-%     filenameFinal = strcat(cameraDir1, '\', CameraDirContents1(1).name);
-%     imageFileNames1{1, i} = char(filenameFinal);
-%     filenameFinal = strcat(cameraDir2, '\', CameraDirContents2(1).name);
-%     imageFileNames2{1, i} = char(filenameFinal);
-% end
-
 %obtain the old images from a previous calibration session
 OGCalibrationSession = uigetfile('', 'Select a calibration session');
 OGCalibrationImages = OGCalibratinSession.BoardSet.FullPathNames;
 
 %add the new calibration picture set to the original calibration images
 newCalibrationSet = cat(1, OGCalibrationImages, newCalibrationImages);
-
-% %add the new calibration picture set to the original calibration images
-% imageFileNames1(1, numImages + 1) = filenameFinal1;
-% imageFileNames2(1, numImages + 1) = filenameFinal2;
-
-%obtain the original reprojection error
-reprojErrors = currStereoParams.ReprojectionErrors;
 
 % Detect checkerboards in images
 [imagePoints, boardSize, imagesUsed] = detectCheckerboardPoints(newCalibrationSet(1,:), newCalibrationSet(2,:));
