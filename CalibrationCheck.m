@@ -22,8 +22,11 @@ secs = 10;
 elapsedTime = 0;
 filenameFinal1 = strcat(pwd, '\', 'calibration_check_pic1.png');
 filenameFinal2 = strcat(pwd, '\', 'calibration_check_pic2.png');
+newCalibrationImages = {1, 2};
 
 %countdown for 1 image
+%NOTE: edit this for two cameras. You'll also need to change the camera
+%settings at the beginning. Just use Joel's code from github
 for k = 1:secs
     elapsedTime = elapsedTime + 1;
     set(edtbox,'string',...
@@ -33,43 +36,55 @@ end
 if elapsedTime >= secs
     I_cam1 = snapshot(vid1);
     imwrite(I_cam1,filenameFinal1);
+    newCalibrationImages{1, 1} = char(filenameFinal1);
     I_cam2 = snapshot(vid2);
     imwrite(I_cam2,filenameFinal2);
+    newCalibrationImages{1, 2} = char(filenameFinal2);
     elapsedTime = 0;
 end
 
-%ask for the folders for camera 1 pictures, THEN camera 2 pictures
-cameraDir1 = uigetdir;
-cameraDir2 = uigetdir;
-CameraDirContents1 = dir(fullfile(cameraDir1, '*.png'));
-CameraDirContents2 = dir(fullfile(cameraDir2, '*.png'));
+% %ask for the folders for camera 1 pictures, THEN camera 2 pictures
+% cameraDir1 = uigetdir;
+% cameraDir2 = uigetdir;
+% CameraDirContents1 = dir(fullfile(cameraDir1, '*.png'));
+% CameraDirContents2 = dir(fullfile(cameraDir2, '*.png'));
+% 
+% %find the number of sets of pictures
+% numImages = size(CameraDirContents1);
+% imageFileNames1 = {1, numImages + 1};
+% imageFileNames2 = {1, numImages + 1};
+% 
+% %obtain the names for the pictures
+% for i = 1:numImages(1)
+%     filenameFinal = strcat(cameraDir1, '\', CameraDirContents1(1).name);
+%     imageFileNames1{1, i} = char(filenameFinal);
+%     filenameFinal = strcat(cameraDir2, '\', CameraDirContents2(1).name);
+%     imageFileNames2{1, i} = char(filenameFinal);
+% end
 
-%find the number of sets of pictures
-numImages = size(CameraDirContents1);
-imageFileNames1 = {1, numImages + 1};
-imageFileNames2 = {1, numImages + 1};
-
-%obtain the names for the pictures
-for i = 1:numImages(1)
-    filenameFinal = strcat(cameraDir1, '\', CameraDirContents1(1).name);
-    imageFileNames1{1, i} = char(filenameFinal);
-    filenameFinal = strcat(cameraDir2, '\', CameraDirContents2(1).name);
-    imageFileNames2{1, i} = char(filenameFinal);
-end
+%obtain the old images from a previous calibration session
+OGCalibrationSession = uigetfile('', 'Select a calibration session');
+OGCalibrationImages = OGCalibratinSession.BoardSet.FullPathNames;
 
 %add the new calibration picture set to the original calibration images
-imageFileNames1(1, numImages + 1) = filenameFinal1;
-imageFileNames2(1, numImages + 1) = filenameFinal2;
+newCalibrationSet = cat(1, OGCalibrationImages, newCalibrationImages);
+
+% %add the new calibration picture set to the original calibration images
+% imageFileNames1(1, numImages + 1) = filenameFinal1;
+% imageFileNames2(1, numImages + 1) = filenameFinal2;
+
+%obtain the original reprojection error
+reprojErrors = currStereoParams.ReprojectionErrors;
 
 % Detect checkerboards in images
-[imagePoints, boardSize, imagesUsed] = detectCheckerboardPoints(imageFileNames1, imageFileNames2);
+[imagePoints, boardSize, imagesUsed] = detectCheckerboardPoints(newCalibrationSet(1,:), newCalibrationSet(2,:));
 
 % Generate world coordinates of the checkerboard keypoints
 squareSize = currSquareSize;  % in units of 'millimeters'
 worldPoints = generateCheckerboardPoints(boardSize, squareSize);
 
 % Read one of the images from the first stereo pair
-I1 = imread(imageFileNames1{1});
+I1 = imread(newCalibrationSet{1});
 [mrows, ncols, ~] = size(I1);
 
 % Calibrate the camera
@@ -89,7 +104,7 @@ h2=figure; showExtrinsics(stereoParams, 'CameraCentric');
 displayErrors(estimationErrors, stereoParams);
 
 % You can use the calibration data to rectify stereo images.
-I2 = imread(imageFileNames2{1});
+I2 = imread(newCalibrationSet{1,2});
 [J1, J2] = rectifyStereoImages(I1, I2, stereoParams);
 
 % See additional examples of how to use the calibration data.  At the prompt type:
@@ -99,7 +114,7 @@ I2 = imread(imageFileNames2{1});
 %obtain the reprojection error of only the calibration check (CC) set of images
 CCReprojErrors = stereoParams.ReprojectionErrors(:, :, numImages + 1);
 
-%find the average Euclidean distance for the CC set
+%find the average Euclidean distance (AED) for the CC set
 CCsize = size(CCreprojErrors);
 AED = 0;
 
@@ -110,9 +125,11 @@ end
 
 AED = AED/CCsize(1);
 
+%output the original reprojection error and the new error to the command
+%window
 OGReprojError = currStereoParams.MeanReprojectionError;
 
-fprintf('Calibration Check Reprojection Error:              %6.4f\n', AED);
+fprintf('Calibration Check Image Set Reprojection Error:    %6.4f\n', AED);
 fprintf('Original Calibration Image Set Reprojection Error: %6.4f\n', OGReprojError);
 
 end
