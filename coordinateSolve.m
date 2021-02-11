@@ -1,42 +1,17 @@
 function [matchedPoints1 matchedPoints2] = coordinateSolve(cam1H, cam1V, cam2H, cam2V,debugON)
 
-%for debug purposes
-% cam1H = unwrapped_row1_adj;
-% cam1V = unwrapped_col1_adj;
-% cam2H = unwrapped_row2_adj;
-% cam2V = unwrapped_col2_adj;
+% This function returns the XY coordinates of points between phases on
+% Camera 1 and Camera 2. 
+%Inputs
+%   cam1H/cam1V: Horizontal and Vertical phase of Camera 1 image
+%   cam2H/cam2V: Horizontal and Vertical phase of Camera 2 image
+%   debugON: debug flag. 1 to view matching contour points and the
+%   intersection point for each matched point. 0 to turn off
+%Outputs
+%   
 warning('off','all')
 %if any pixels are NaN, replace them and their corresponding pixel on the
 %other camera with 0
-
-
-% %make a poly22 fit for the phases from camera 2
-% [phase_Y, phase_X] = ndgrid(1:phase_size(1), 1:phase_size(2));
-% [M,N] = size(cam2H);
-% phase_Y = 1:N;
-% phase_X = 1:M;
-% [phase_Y, phase_X] = meshgrid(phase_Y,phase_X);
-% phaseFitH = fit([phase_X(:) phase_Y(:)], cam2H(:), 'poly22', 'Exclude',...
-%     cam2H(:) == 0);
-% phaseFitV = fit([phase_X(:) phase_Y(:)], cam2V(:), 'poly22', 'Exclude',...
-%     cam2V(:) == 0);
-% % plot(phaseFitH);
-% % plot(phaseFitV);
-% 
-% %obtain the coefficient values
-% coeffValsH = coeffvalues(phaseFitH);
-% coeffValsV = coeffvalues(phaseFitV);
-% 
-% %Create coefficient matrix
-% coeffM = [coeffValsH; coeffValsV];
-% 
-% coeffMinv = pinv(coeffM);
-% 
-% PhaseM = [cam1H(:) cam1V(:)];
-% 
-% Coords = coeffMinv*PhaseM';
-% X = Coords(2,:);
-% Y = Coords(3,:);
 
 scale = 1;
 
@@ -67,19 +42,20 @@ if debugON
     f = figure;
 end
 
+dx = 100;
+dy = 100;
 
-for i = 1:10:M
-    
-    for j = 1:10:N
+%Loop through each point
+for i = 1:dx:M
+    for j = 1:dy:N
         if ~isnan(cam1H(i,j)) %Check for valid point
-            %store sampled point on camera 1
+            %store sampled point from camera 1
             matchedPointsX = [matchedPointsX j];
             matchedPointsY = [matchedPointsY i];
             
             %find where the phases of the current point occurs in camera 2
             [indHx, indHy] = find(cam2H == cam1H(i,j));
             [indVx, indVy] = find(cam2V == cam1V(i,j));
-            
            
             %calculate intersection
             %find the boundaries of the intersection
@@ -88,6 +64,8 @@ for i = 1:10:M
             minxV = min(indVy);
             maxxV = max(indVy);
             
+            %Identify the limitations in the calculate intersection
+            %location
             xlims = [minxH maxxH minxV maxxV];
             [m,Imin] = min(xlims);
             xlims(Imin) = [];
@@ -111,26 +89,22 @@ for i = 1:10:M
             end
             
             %Make sure the calculated intersection point is reasonable, and
-            %not extrapolated
+            %not extrapolated outside the edges of the data
             try
             if y_intersecttemp > 0 && x_intersecttemp > xlims(1) && y_intersecttemp < M*scale && x_intersecttemp < xlims(2) && ~isnan(cam2H(round(y_intersecttemp),round(x_intersecttemp)))
                 x_intersect = [x_intersect x_intersecttemp/scale];
                 y_intersect = [y_intersect y_intersecttemp/scale];
             else
+                %Remove Point from matched points if error
                 matchedPointsX(end) = [];
                 matchedPointsY(end) = [];
             end
             catch
+                %Remove Point from matched points if error
                 matchedPointsX(end) = [];
                 matchedPointsY(end) = [];
             end
-           
-            
-%             x_intersecttemp = roots(p1-p2);
-%             y_intersecttemp = polyval(p1,x_intersecttemp);
-%             root_ind = find(y_intesecttemp > miny & y_intersecttemp < maxy & x_intesecttemp > minx & x_intersecttemp < maxx);
-%             x_intersecttemp = x_intersecttemp(root_ind(1));
-%             y_intersecttemp = y_intersecttemp(root_ind(1));
+
             if debugON
 
                 imagesc(imresize(cam2H,1/scale)); hold on;
@@ -138,6 +112,7 @@ for i = 1:10:M
                 scatter(indVy/scale,indVx/scale)
                 scatter(x_intersecttemp/scale,y_intersecttemp/scale,'*','k','LineWidth',10)
                 hold off
+                waitforbuttonpress
             end
         
         end
