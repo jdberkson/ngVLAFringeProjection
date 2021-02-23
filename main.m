@@ -233,7 +233,7 @@ xlabel('X');ylabel('Y');zlabel('Z')
 zlim('manual')
 axis square
 
-[xi,yi,zi] = InterpolateXY(Xc,Yc,Zc,50);
+[xi,yi,zi] = InterpolateXY(Xc,Yc,Zc,100);
 zi_p = removePlane(zi);
 figure
 imagesc(zi_p); colorbar
@@ -242,5 +242,5 @@ imagesc(zi_p); colorbar
 % Yf = ptcFARO.Location(:,2);
 % Zf = ptcFARO.Location(:,3);
 % 
-% [xif,yif,zif] = InterpolateXY(Xf,Yf,Zf,50);
+[xif,yif,zif] = InterpolateXY(Xf,Yf,Zf,100);
 
