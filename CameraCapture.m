@@ -21,7 +21,7 @@ edtbox = uicontrol('style','edit','string','STARTING','units','normalized',...
 
 %variables
 secs = 20;
-numImages = 15;
+numImages = 10;
 min = 0;
 elapsedTime = 0;
 squareSize = 20; %in mm

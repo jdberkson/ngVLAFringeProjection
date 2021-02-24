@@ -16,12 +16,12 @@ warning('off','all')
 scale = 1;
 
 [M,N] = size(cam1H);
-cam2H = round(cam2H,3);
-cam2V = round(cam2V,3);
+cam2H = round(cam2H,2);
+cam2V = round(cam2V,2);
 
 
-cam1H = round(cam1H,3);
-cam1V = round(cam1V,3);
+cam1H = round(cam1H,2);
+cam1V = round(cam1V,2);
 
 % cam1H = CropAperture(cam1H,10);
 % cam1V = CropAperture(cam1V,10);
@@ -42,8 +42,8 @@ if debugON
     f = figure;
 end
 
-dx = 100;
-dy = 100;
+dx = 40;
+dy = 40;
 
 %Loop through each point
 for i = 1:dx:M

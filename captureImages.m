@@ -20,9 +20,9 @@ function [out1, out2] = captureImages(vidobj1,vidobj2,FringePattern,ScreenNum,Pa
     fullscreen(FringePattern(:,:,1),ScreenNum)
     [Proj_H, Proj_W] = size(FringePattern(:,:,1));
     VerticalLine = zeros(Proj_H,Proj_W);
-    VerticalLine(:,round(Proj_W/2)) = 255;
+    VerticalLine(:,round(Proj_W/2):round(Proj_W/2)+1) = 255;
     HorizontalLine = zeros(Proj_H,Proj_W);
-    HorizontalLine(round(Proj_H/2),:) = 255;
+    HorizontalLine(round(Proj_H/2):round(Proj_H/2)+1,:) = 255;
  
     RepNum = 2*PatternPars.Steps;
     %Preallocate Image arrays
