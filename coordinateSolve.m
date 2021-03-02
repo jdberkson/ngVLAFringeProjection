@@ -42,8 +42,8 @@ if debugON
     f = figure;
 end
 
-dx = 40;
-dy = 40;
+dx = 50;
+dy = 50;
 
 %Loop through each point
 for i = 1:dx:M
@@ -127,7 +127,7 @@ imagesc(imresize(cam2H,1/scale)); hold on;
 scatter(x_intersect,y_intersect,'*')
 
 matchedPoints1 = [matchedPointsX;matchedPointsY];
-matchedPoints2 = [x_intersect;y_intersect];
+matchedPoints2 = [y_intersect;x_intersect];
 
 warning('on','all')
 

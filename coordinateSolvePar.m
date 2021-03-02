@@ -23,8 +23,8 @@ cam2V = round(cam2V,2);
 cam1H = round(cam1H,2);
 cam1V = round(cam1V,2);
 
-% cam1H = CropAperture(cam1H,10);
-% cam1V = CropAperture(cam1V,10);
+cam1H = CropAperture(cam1H,20);
+cam1V = CropAperture(cam1V,20);
 
 
 matchedPointsX = [];
@@ -33,30 +33,21 @@ x_intersect = [];
 y_intersect = [];
 close all;
 
-figure
-subplot(1,2,1)
-imagesc(cam1H); hold on;
-subplot(1,2,2)
-imagesc(imresize(cam2H,1/scale)); hold on;
-if debugON
-    f = figure;
-end
-
-dx = 20;
-dy = 20;
+dx = 1;
+dy = 1;
 
 
-matchedPointsX = (1:floor(M/dx))*dx;
-matchedPointsY = (1:floor(N/dy))*dy;
-[matchedPointsX, matchedPointsY] = meshgrid(matchedPointsX, matchedPointsY);
-matchedPointsX = matchedPointsX(:);
-matchedPointsY = matchedPointsY(:);
+% matchedPointsY = (1:floor(N/dx))*dx;
+% matchedPointsX = (1:floor(M/dy))*dy;
+% [matchedPointsX, matchedPointsY] = meshgrid(matchedPointsX, matchedPointsY);
+% matchedPointsX = matchedPointsX(:);
+% matchedPointsY = matchedPointsY(:);
 %Loop through each point
 parfor i = 1:floor(M/dx)
     for j = 1:floor(N/dy)
         try
         if ~isnan(cam1H(1+(i-1)*dx,1+(j-1)*dy)) %Check for valid point
-            
+
             %store sampled point from camera 1
 
             
@@ -98,30 +89,40 @@ parfor i = 1:floor(M/dx)
             %Make sure the calculated intersection point is reasonable, and
             %not extrapolated outside the edges of the data
             try
-            if y_intersecttemp > 0 && x_intersecttemp > xlims(1) && y_intersecttemp < M*scale && x_intersecttemp < xlims(2) && ~isnan(cam2H(round(y_intersecttemp),round(x_intersecttemp)))
-                x_intersect = [x_intersect x_intersecttemp/scale];
-                y_intersect = [y_intersect y_intersecttemp/scale];
+            if y_intersecttemp > 0 && x_intersecttemp > xlims(1) && y_intersecttemp < M && x_intersecttemp < xlims(2) && ~isnan(cam2H(round(y_intersecttemp),round(x_intersecttemp)))
+                x_intersect = [x_intersect x_intersecttemp];
+                y_intersect = [y_intersect y_intersecttemp];
+                matchedPointsX = [matchedPointsX 1+(j-1)*dy];
+                matchedPointsY = [matchedPointsY 1+(i-1)*dx];
             else 
                 x_intersect = [x_intersect 0];
                 y_intersect = [y_intersect 0];
+                matchedPointsX = [matchedPointsX 0];
+                matchedPointsY = [matchedPointsY 0];
+
             end
             catch
                 x_intersect = [x_intersect 0];
                 y_intersect = [y_intersect 0];
+                matchedPointsX = [matchedPointsX 0];
+                matchedPointsY = [matchedPointsY 0];
             end
 
             if debugON
 
-                imagesc(imresize(cam2H,1/scale)); hold on;
-                scatter(indHy/scale,indHx/scale)
-                scatter(indVy/scale,indVx/scale)
-                scatter(x_intersecttemp/scale,y_intersecttemp/scale,'*','k','LineWidth',10)
+                imagesc(cam2H); hold on;
+                scatter(indHy,indHx)
+                scatter(indVy,indVx)
+                scatter(x_intersecttemp,y_intersecttemp,'*','k','LineWidth',10)
                 hold off
+           
                 waitforbuttonpress
             end
         else
             x_intersect = [x_intersect 0];
             y_intersect = [y_intersect 0];
+            matchedPointsX = [matchedPointsX 0];
+            matchedPointsY = [matchedPointsY 0];
         end
         catch
         end
@@ -130,12 +131,12 @@ end
 
 subplot(1,2,1)
 imagesc(cam1H); hold on;
-scatter(matchedPointsY,matchedPointsX);
+scatter(matchedPointsX,matchedPointsY);
 subplot(1,2,2)
-imagesc(imresize(cam2H,1/scale)); hold on;
+imagesc(cam2H); hold on;
 scatter(x_intersect,y_intersect,'*')
 
-matchedPoints1 = [matchedPointsX';matchedPointsY'];
+matchedPoints1 = [matchedPointsX;matchedPointsY];
 matchedPoints2 = [x_intersect;y_intersect];
 
 warning('on','all')

@@ -165,7 +165,13 @@ cam1V = undistortImage(cam1V,stereoParams.CameraParameters1);
 cam2H = undistortImage(cam2H,stereoParams.CameraParameters2);
 cam2V = undistortImage(cam2V,stereoParams.CameraParameters2);
 
-[matchedPoints1, matchedPoints2] = coordinateSolve(cam1H, cam1V, cam2H, cam2V,0);
+[matchedPoints1, matchedPoints2] = coordinateSolvePar(cam1H, cam1V, cam2H, cam2V,0);
+
+[row,col] = find(matchedPoints2 == 0);
+matchedPoints1(:,col) = [];
+matchedPoints2(:,col) = [];
+
+
 
 % matchedPoints1 = undistortPoints(matchedPoints1',stereoParams.CameraParameters2);
 % matchedPoints2 = undistortPoints(matchedPoints2',stereoParams.CameraParameters1);
@@ -195,7 +201,7 @@ pcshow(ptc,'MarkerSize',15)
 
 xlabel('X');ylabel('Y');zlabel('Z')
 
-planefit = pcfitplane(planeptc,1);
+planefit = pcfitplane(planeptc,5);
 n = planefit.Normal;
 theta = -pi/2+atan(n(3)/n(2));
 phi = pi/2-atan(n(3)/n(1));
@@ -242,5 +248,5 @@ imagesc(zi_p); colorbar
 % Yf = ptcFARO.Location(:,2);
 % Zf = ptcFARO.Location(:,3);
 % 
-[xif,yif,zif] = InterpolateXY(Xf,Yf,Zf,100);
+%[xif,yif,zif] = InterpolateXY(Xf,Yf,Zf,100);
 
