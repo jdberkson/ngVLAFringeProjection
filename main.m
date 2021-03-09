@@ -165,12 +165,7 @@ cam1V = undistortImage(cam1V,stereoParams.CameraParameters1);
 cam2H = undistortImage(cam2H,stereoParams.CameraParameters2);
 cam2V = undistortImage(cam2V,stereoParams.CameraParameters2);
 
-[matchedPoints1, matchedPoints2] = coordinateSolvePar(cam1H, cam1V, cam2H, cam2V,0);
-
-[row,col] = find(matchedPoints2 == 0);
-matchedPoints1(:,col) = [];
-matchedPoints2(:,col) = [];
-
+[matchedPoints1, matchedPoints2] = coordinateSolve_HK(cam1H, cam1V, cam2H, cam2V,0);
 
 
 % matchedPoints1 = undistortPoints(matchedPoints1',stereoParams.CameraParameters2);
@@ -238,8 +233,11 @@ xlabel('X');ylabel('Y');zlabel('Z')
 
 zlim('manual')
 axis square
-
-[xi,yi,zi] = InterpolateXY(Xc,Yc,Zc,100);
+xmin = min(Xc);
+xmax = max(Xc);
+ymin = min(Yc);
+ymax = max(Yc);
+[xi,yi,zi] = InterpolateXY(Xc,Yc,Zc,100,xmin,xmax,ymin,ymax);
 zi_p = removePlane(zi);
 figure
 imagesc(zi_p); colorbar
