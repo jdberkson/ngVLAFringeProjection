@@ -5,11 +5,25 @@ close all;
 % vid = videoinput('pointgrey', 1, 'F7_Mono16_1280x1024_Mode0');
 % src = getselectedsource(vid);
 % vid.FramesPerTrigger = 1;
-
-vid1 = webcam(1);
-vid2 = webcam(2);
-vid1.Resolution = '3264x2448';
-vid2.Resolution = '3264x2448';
+try
+    vid1 = videoinput('mwspinnakerimaq', 1, 'Mono16');
+    src1 = getselectedsource(vid1);
+    set(src1,'BinningHorizontal',1)
+    set(src1,'BinningVertical',1)
+    vid1.ROIPosition = [0 0 5472 3648];
+    
+    vid2 = videoinput('mwspinnakerimaq', 2, 'Mono16');
+    src2 = getselectedsource(vid2);
+    src1 = getselectedsource(vid2);
+    set(src2,'BinningHorizontal',1)
+    set(src2,'BinningVertical',1)
+    vid2.ROIPosition = [0 0 5472 3648];
+catch
+    vid1 = webcam(1);
+    vid2 = webcam(2);
+    vid1.Resolution = '3264x2448';
+    vid2.Resolution = '3264x2448';
+end
 
 %these are the settings for the countdown window
 countdownfig = figure('numbertitle','off','name','COUNTDOWN',...
@@ -20,8 +34,8 @@ edtbox = uicontrol('style','edit','string','STARTING','units','normalized',...
     'position',edtpos,'fontsize',62,'foregroundcolor','r');
 
 %variables
-secs = 20;
-numImages = 10;
+secs = 15;
+numImages = 15;
 min = 0;
 elapsedTime = 0;
 squareSize = 20; %in mm
@@ -38,10 +52,17 @@ filenameName = "picture_%d.png";
 
 %first loop is the number of pictures, second loop is the number of
 %seconds between each picture
+figure;gca;
+previewhandle1= image( zeros([3648,5472, 3], 'uint16') );
+preview(vid1,previewhandle1)
+figure;gca;
+previewhandle2 = image( zeros([3648,5472, 3], 'uint16') );
+
+preview(vid2,previewhandle2)
+
 for j = 1:numImages
-    preview(vid1);
-    preview(vid2);
-    pause(5)
+
+    pause(3)
     
     filenameFinalName = sprintf(filenameName, j);
     filenameFinal_cam1 = strcat(filenameAddress_cam1, filenameFinalName);
@@ -54,10 +75,14 @@ for j = 1:numImages
         pause(1);
     end
     if elapsedTime >= secs
-
-        I_cam1 = snapshot(vid1);
+        try
+            I_cam1 = getsnapshot(vid1);
+            I_cam2 = getsnapshot(vid2);
+        catch
+            I_cam1 = snapshot(vid1);
+            I_cam2 = snapshot(vid2);
+        end
         imwrite(I_cam1,filenameFinal_cam1);
-        I_cam2 = snapshot(vid2);
         imwrite(I_cam2,filenameFinal_cam2);
         elapsedTime = 0;
     end

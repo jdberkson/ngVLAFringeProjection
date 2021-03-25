@@ -1,16 +1,17 @@
-clc; clear all; close all;
-[I1, I2] = ProjectFringesAndCenterline(20,60);
+clc; clear all; close all; closescreen;
+numsteps = 8;
+[I1, I2] = ProjectFringesAndCenterline(numsteps, 100 , 100);
 [M,N] = size(I1(:,:,1));
-I_row1 = zeros(M,N,8);
-I_column1 = zeros(M,N,8);
-I_row2 = zeros(M,N,8);
-I_column2 = zeros(M,N,8);
-for i = 1:8
-    I_row1(:,:,i) = I1(:,:,i);
-    I_column1(:,:,i) = I1(:,:,i+8);    
 
+I_row1 = zeros(M,N,numsteps);
+I_column1 = zeros(M,N,numsteps);
+I_row2 = zeros(M,N,numsteps);
+I_column2 = zeros(M,N,numsteps);
+for i = 1:numsteps
+    I_row1(:,:,i) = I1(:,:,i);
+    I_column1(:,:,i) = I1(:,:,i+numsteps);    
     I_row2(:,:,i) = I2(:,:,i);
-    I_column2(:,:,i) = I2(:,:,i+8);
+    I_column2(:,:,i) = I2(:,:,i+numsteps);
 end
 
 [wrappedPhase_row1,modulation_row1] = Equal_step(I_row1); 
@@ -45,25 +46,43 @@ end
 % mask2 = imfill(mask2,'holes');
 % mask2 = double(bwareaopen(mask2,1000));
 % mask2(mask2==0) = NaN;
+
+
+
 figure
 imagesc(wrappedPhase_row1)
 [x,y] = ginput(4);
-mask1 = poly2mask(x,y,2448,3264);
+mask1 = poly2mask(x,y,size(modulation_column1,1),size(modulation_column1,2));
 
 mask1 = double(mask1);
 mask1(mask1==0) = NaN;
 imagesc(wrappedPhase_row2)
 [x,y] = ginput(4);
-mask2 = poly2mask(x,y,2448,3264);
+mask2 = poly2mask(x,y,size(modulation_column1,1),size(modulation_column1,2));
 mask2 = double(mask2);
 mask2(mask2==0) = NaN;
 
+%Masking undesirable values 
+masked1 = mask1.*I1(:,:,end);
+masked1 = removePlane(masked1);
+stddev = std(masked1(:),'omitnan');
+masked1(masked1 < -1.5*stddev) = NaN;
+masked1(masked1 > 1.5*stddev) = NaN;
 
-%Unwrap Data
-unwrapped_row1 = unwrap_phase(wrappedPhase_row1.*mask1);
-unwrapped_col1 = unwrap_phase(wrappedPhase_column1.*mask1);
-unwrapped_row2 = unwrap_phase(wrappedPhase_row2.*mask2);
-unwrapped_col2 = unwrap_phase(wrappedPhase_column2.*mask2);
+masked2 = mask2.*I2(:,:,end);
+masked2 = removePlane(masked2);
+stddev = std(masked2(:),'omitnan');
+masked2(masked2 < -1.5*stddev) = NaN;
+masked2(masked2 > 1.5*stddev) = NaN;
+masked1 = mask1;
+masked2 = mask2;
+
+% %Unwrap Data
+unwrapped_row1 = unwrap_phase(wrappedPhase_row1.*mask1.*masked1);
+unwrapped_col1 = unwrap_phase(wrappedPhase_column1.*mask1.*masked1);
+unwrapped_row2 = unwrap_phase(wrappedPhase_row2.*mask2.*masked2);
+unwrapped_col2 = unwrap_phase(wrappedPhase_column2.*mask2.*masked2);
+
 figure
 sgtitle('Y phase')
 subplot(1,2,1)
@@ -82,7 +101,7 @@ imagesc(unwrapped_col2);colorbar;
 title('Camera 2')
 
 figure
-VerticalLine = I1(:,:,17).*mask1;
+VerticalLine = I1(:,:,2*numsteps+1).*mask1;
 imagesc(VerticalLine)
 title('Select brightest point in background')
 [x,y] = ginput(1);
@@ -94,7 +113,7 @@ imagesc(VerticalLine)
 PhaseOffsetVert1 = mean(unwrapped_col1(VerticalLine==1));
 unwrapped_col1_adj = unwrapped_col1-PhaseOffsetVert1;
 
-VerticalLine = I2(:,:,17).*mask2;
+VerticalLine = I2(:,:,2*numsteps+1).*mask2;
 imagesc(VerticalLine)
 title('Select brightest point in background')
 [x,y] = ginput(1);
@@ -106,7 +125,7 @@ imagesc(VerticalLine)
 PhaseOffsetVert2 = mean(unwrapped_col2(VerticalLine==1));
 unwrapped_col2_adj = unwrapped_col2-PhaseOffsetVert2;
 
-HorizontalLine = I1(:,:,18).*mask1;
+HorizontalLine = I1(:,:,2*numsteps+2).*mask1;
 imagesc(HorizontalLine)
 title('Select brightest point in background')
 [x,y] = ginput(1);
@@ -118,7 +137,7 @@ imagesc(HorizontalLine)
 PhaseOffsetHoriz1 = mean(unwrapped_row1(HorizontalLine==1));
 unwrapped_row1_adj = unwrapped_row1-PhaseOffsetHoriz1;
 
-HorizontalLine = I2(:,:,18).*mask2;
+HorizontalLine = I2(:,:,2*numsteps+1).*mask2;
 imagesc(HorizontalLine)
 title('Select brightest point in background')
 [x,y] = ginput(1);
@@ -164,6 +183,10 @@ cam1H = undistortImage(cam1H,stereoParams.CameraParameters1);
 cam1V = undistortImage(cam1V,stereoParams.CameraParameters1);
 cam2H = undistortImage(cam2H,stereoParams.CameraParameters2);
 cam2V = undistortImage(cam2V,stereoParams.CameraParameters2);
+cam1H(cam1H == 0) = NaN;
+cam1V(cam1V == 0) = NaN;
+cam2H(cam2H == 0) = NaN;
+cam2V(cam2V == 0) = NaN;
 
 [matchedPoints1, matchedPoints2] = coordinateSolve_HK(cam1H, cam1V, cam2H, cam2V,0);
 
@@ -227,7 +250,7 @@ XYZc = [Xc Yc Zc];
 
 ptc = pointCloud(XYZc);
 subplot(1,2,2)
-pcshow(ptc,'MarkerSize',200)
+pcshow(ptc,'MarkerSize',20)
 
 xlabel('X');ylabel('Y');zlabel('Z')
 

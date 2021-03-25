@@ -1,8 +1,8 @@
 clc;clear all; close all;
 
 p = 1.55;
-Res_h = 4000;
-Res_v = 3000;
+Res_h = 3264;
+Res_v = 2448;
 
 detH = Res_h*p*10^-3/2;
 detV = Res_v*p*10^-3/2;
@@ -11,10 +11,10 @@ detV = Res_v*p*10^-3/2;
 % z = .5;
 % f = .010;
 % b = 2;
-d = 1;
-z = 1;
-f = .012;
-b = 6;
+d = .5;
+z = .7;
+f = .006;
+b = 1.7;
 
 FOVh = atand(detH/f);
 FOVv = atand(detV/f);

@@ -1,10 +1,25 @@
-function newReprojError = CalibrationCheck(currSquareSize)
+function CalibrationCheck(currSquareSize)
 %this acquires the camera and sets some settings
-vid1 = webcam(1);
-vid2 = webcam(2);
-vid1.Resolution = '3264x2448';
-vid2.Resolution = '3264x2448';
-
+close all; clc;
+try
+    vid1 = videoinput('mwspinnakerimaq', 1, 'Mono16');
+    src1 = getselectedsource(vid1);
+    set(src1,'BinningHorizontal',1)
+    set(src1,'BinningVertical',1)
+    vid1.ROIPosition = [0 0 5472 3648];
+    
+    vid2 = videoinput('mwspinnakerimaq', 2, 'Mono16');
+    src2 = getselectedsource(vid2);
+    src1 = getselectedsource(vid2);
+    set(src2,'BinningHorizontal',1)
+    set(src2,'BinningVertical',1)
+    vid2.ROIPosition = [0 0 5472 3648];
+catch
+    vid1 = webcam(1);
+    vid2 = webcam(2);
+    vid1.Resolution = '3264x2448';
+    vid2.Resolution = '3264x2448';
+end
 %these are the settings for the countdown window
 countdownfig = figure('numbertitle','off','name','COUNTDOWN',...
     'color','w','menubar','none','toolbar','none',...
@@ -15,8 +30,13 @@ edtbox = uicontrol('style','edit','string','STARTING','units','normalized',...
 
 %start image accquisition, set some variables, name the calibration check
 %picture
-preview(vid1);
-preview(vid2);
+figure;gca;
+previewhandle1= image( zeros([3648,5472, 3], 'uint16') );
+preview(vid1,previewhandle1)
+figure;gca;
+previewhandle2 = image( zeros([3648,5472, 3], 'uint16') );
+preview(vid2,previewhandle2)
+
 min = 0;
 secs = 10;
 elapsedTime = 0;
@@ -34,10 +54,16 @@ for k = 1:secs
     pause(1);
 end
 if elapsedTime >= secs
-    I_cam1 = snapshot(vid1);
+    try
+        I_cam1 = getsnapshot(vid1);
+        I_cam2 = getsnapshot(vid2);
+    catch
+        I_cam1 = snapshot(vid1);
+        I_cam2 = snapshot(vid2);
+    end
+    
     imwrite(I_cam1,filenameFinal1);
     newCalibrationImages{1, 1} = char(filenameFinal1);
-    I_cam2 = snapshot(vid2);
     imwrite(I_cam2,filenameFinal2);
     newCalibrationImages{1, 2} = char(filenameFinal2);
     elapsedTime = 0;

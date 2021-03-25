@@ -42,8 +42,8 @@ if debugON
     f = figure;
 end
 
-dx = 50;
-dy = 50;
+dx = 100;
+dy = 100;
 
 %Loop through each point
 for i = 1:dx:M
@@ -111,6 +111,10 @@ for i = 1:dx:M
                 scatter(indHy/scale,indHx/scale)
                 scatter(indVy/scale,indVx/scale)
                 scatter(x_intersecttemp/scale,y_intersecttemp/scale,'*','k','LineWidth',10)
+                plot(Hcurve)
+                plot(Vcurve)
+                
+               
                 hold off
                 waitforbuttonpress
             end

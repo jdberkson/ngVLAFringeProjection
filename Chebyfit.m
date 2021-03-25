@@ -21,7 +21,8 @@ function [coeffs,termXY] = Chebyfit(X,Y,Z,N)
     ChebyMatrix(1,:) = 1;
     ChebyMatrix(2:end,:) = termXY(X,Y)';
     
-    coeffs = pinv(ChebyMatrix')*Z;
+    %coeffs = pinv(ChebyMatrix')*Z;
+    coeffs = ChebyMatrix'\Z;
     
 
 end
